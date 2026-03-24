@@ -28,30 +28,37 @@ The repository focuses on a single cuboid setting and uses simulation to generat
 
 ## Main idea
 
-Instead of planning every grasp-place pair from scratch at runtime, this project builds a predictive model from simulation-generated data.
+Instead of planning every grasp–placement pair from scratch at runtime, this project builds a predictive model from simulation-generated data.
 
-The general workflow is:
+The repository is organized around one **final successful pipeline** and several **earlier experimental iterations**.
 
-1. Generate candidate grasps for an object
-2. Sample target placement poses
-3. Evaluate each grasp–placement pair in simulation
-4. Label outcomes based on feasibility and execution-related criteria
-5. Train a model to predict placement quality from grasp and pose information
-6. Use the learned model to rank candidates before expensive planning
+The final pipeline has three main stages:
 
-This makes the pipeline useful for reducing planning cost while preserving feasible robot behavior.
+1. **Offline data generation**  
+   Candidate grasps, initial poses, and target placement poses are sampled in simulation without physics. Each grasp–placement pair is labeled using path-wise inverse-kinematics and collision checks.
+
+2. **Model training**  
+   A dual-head MLP is trained to predict:
+   - IK feasibility
+   - collision feasibility
+
+3. **Executed-simulation evaluation**  
+   The learned scores are used to rank grasp–placement candidates, which are then tested under physics-enabled execution with motion planning.
 
 ## Repository structure
 
 ```text
 .
-├── cube_generalization/   # Learning and generalization-related components
-├── cube_simulation/       # Core cuboid simulation pipeline
-├── path_simulation/       # Path-related validation / trajectory evaluation
-├── ycb_simulation/        # Additional simulation experiments on object sets
-├── docker_files/          # Docker build and environment setup files
-├── configs/               # Configuration files
-├── docs/                  # Setup notes, troubleshooting, and legacy notes
+├── assets/                         # Figures, diagrams, and demo images
+├── docker/                         # Docker build and environment setup files
+├── docs/                           # Setup notes, troubleshooting, and legacy notes
+├── final_pipeline/
+│   └── 04_path_simulation/         # Final successful path-aware validation pipeline
+├── legacy_experiments/             # Earlier research iterations kept for reference
+│   ├── 01_cube_simulation/            # First cuboid simulation pipeline
+│   ├── 02_ycb_simulation/             # Intermediate object-set simulation experiments
+│   └── 03_cube_generalization/        # Third generalization attempt
+├── .gitignore
+├── README.md
 ├── requirements.txt
-├── run_pipeline.sh
-└── README.md
+└── run_pipeline.sh
